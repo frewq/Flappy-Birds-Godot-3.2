@@ -1,6 +1,7 @@
 extends RigidBody2D
 
 func _ready():
+	set_linear_velocity(Vector2(50, linear_velocity.y))
 	pass
 
 func _process(delta):
@@ -19,6 +20,6 @@ func aletear():
 	pass
 	
 func _input(event):
-	if Input.is_action_pressed("aletear"):
+	if Input.is_action_just_pressed("aletear"):
 		aletear()
 	pass
