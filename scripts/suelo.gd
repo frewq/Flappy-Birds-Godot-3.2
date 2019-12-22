@@ -6,6 +6,7 @@ onready var camara = utils.get_nodo_principal().get_node("camara")
 signal destruido
 
 func _ready():
+	add_to_group(juego.GRUPO_SUELOS)
 	pass
 
 func _process(delta):

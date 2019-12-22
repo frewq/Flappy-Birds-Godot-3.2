@@ -4,6 +4,7 @@ onready var derecha = get_node("derecha")
 onready var camara = utils.get_nodo_principal().get_node("camara")
 
 func _ready():
+	add_to_group(juego.GRUPO_CANOS)
 	pass
 
 func _process(delta):

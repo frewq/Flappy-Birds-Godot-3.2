@@ -8,6 +8,17 @@ const OFFSET_Y = 55
 const CANTIDAD_PARA_LLENAR_PANTALLA = 3
 
 func _ready():
+	var pajaro = utils.get_nodo_principal().get_node("pajaro")
+	if pajaro:
+		pajaro.connect("state_cambio", self,"_on_pajaro_state_cambia", [], CONNECT_ONESHOT)
+	pass
+	
+func _on_pajaro_state_cambia(pajaro):
+	if pajaro.get_state() == pajaro.STATE_ALETEANDO:
+		iniciar()
+	pass
+	
+func iniciar():
 	posisicion_inicial()
 	
 	for i in range(CANTIDAD_PARA_LLENAR_PANTALLA):
@@ -19,8 +30,13 @@ func posisicion_inicial():
 	
 	var pos_inicial = Vector2()
 	pos_inicial.x = get_viewport_rect().size.x + CANO_WIDTH/2
-	
 	pos_inicial.y = rand_range(0 + OFFSET_Y, get_viewport_rect().size.y - ALTURA_SUELO - OFFSET_Y)
+	
+	var camara = utils.get_nodo_principal().get_node("camara")
+	if camara:
+		pos_inicial.x += camara.get_total_pos().x
+	
+	
 	set_position(pos_inicial)
 	pass
 
