@@ -4,6 +4,11 @@ const GRUPO_CANOS = "canos"
 const GRUPO_SUELOS = "suelos"
 const GRUPO_PAJAROS = "pajaros"
 
+const MEDALLA_BRONCE   = 1
+const MEDALLA_PLATA   = 2
+const MEDALLA_ORO    = 3
+const MEDALLA_BRONCE_PLATINO= 4
+
 var puntaje_mejor = 0 setget _set_puntaje_mejor
 var puntaje_actual = 0 setget _set_puntaje_actual
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://scenes/fondo.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/pajaro.tscn" type="PackedScene" id=2]
@@ -16,6 +16,10 @@
 [ext_resource path="res://sprites/number_middle_0.png" type="Texture" id=14]
 [ext_resource path="res://scripts/hbox_mejor_puntaje.gd" type="Script" id=15]
 [ext_resource path="res://sprites/label_new.png" type="Texture" id=16]
+[ext_resource path="res://sprites/medal_bronze.png" type="Texture" id=17]
+[ext_resource path="res://sprites/spark_2.png" type="Texture" id=18]
+[ext_resource path="res://sprites/spark_0.png" type="Texture" id=19]
+[ext_resource path="res://sprites/spark_1.png" type="Texture" id=20]
 
 [sub_resource type="GDScript" id=1]
 resource_name = "btn_instrucciones"
@@ -163,6 +167,71 @@ func _ready():
 	juego.connect(\"puntaje_mejor_cambio\",self,\"show\")
 	pass
 "
+
+[sub_resource type="GDScript" id=9]
+resource_name = "tex_medalla"
+script/source = "extends TextureRect
+
+const circulo_medalla_bronce = preload(\"res://sprites/medal_bronze.png\")
+const circulo_medalla_plata = preload(\"res://sprites/medal_silver.png\")
+const circulo_medalla_oro = preload(\"res://sprites/medal_gold.png\")
+const circulo_medalla_plateada = preload(\"res://sprites/medal_platinum.png\")
+
+func _ready():
+	var hbox_ultimo_puntaje = utils.get_nodo_principal().find_node(\"hbox_ultimo_puntaje\")
+	if hbox_ultimo_puntaje:
+		hbox_ultimo_puntaje.connect(\"contar_termino\",self, \"mostrar_medalla\")
+	pass
+
+func mostrar_medalla():
+	var textura = null
+	
+	if juego.puntaje_actual >= juego.MEDALLA_BRONCE: textura = circulo_medalla_bronce
+	if juego.puntaje_actual >= juego.MEDALLA_PLATA: textura = circulo_medalla_plata
+	if juego.puntaje_actual >= juego.MEDALLA_ORO: textura = circulo_medalla_oro
+	if juego.puntaje_actual >= juego.MEDALLA_BRONCE_PLATINO: textura = circulo_medalla_plateada
+	
+	
+	if textura != null:
+		set_texture(textura)
+		show()
+"
+
+[sub_resource type="SpriteFrames" id=10]
+animations = [ {
+"frames": [ ExtResource( 19 ), ExtResource( 20 ), ExtResource( 18 ) ],
+"loop": true,
+"name": "default",
+"speed": 5.0
+} ]
+
+[sub_resource type="Animation" id=11]
+resource_name = "brillar"
+length = 0.5
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 0, 1, 2, 1, 0 ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray(  ),
+"transitions": PoolRealArray(  ),
+"values": [  ]
+}
 
 [sub_resource type="GDScript" id=7]
 resource_name = "hbox_botones"
@@ -370,6 +439,25 @@ script = SubResource( 8 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="tex_medalla" type="TextureRect" parent="hud/cntr_gameover/txt_panelpuntaje"]
+margin_left = 12.792
+margin_top = 21.1716
+margin_right = 34.792
+margin_bottom = 43.1716
+texture = ExtResource( 17 )
+script = SubResource( 9 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="circulo_brillo" type="AnimatedSprite" parent="hud/cntr_gameover/txt_panelpuntaje/tex_medalla"]
+position = Vector2( 1.62009, 2.06493 )
+frames = SubResource( 10 )
+
+[node name="anim" type="AnimationPlayer" parent="hud/cntr_gameover/txt_panelpuntaje/tex_medalla/circulo_brillo"]
+playback_speed = 0.8
+anims/brillar = SubResource( 11 )
 
 [node name="hbox_botones" type="HBoxContainer" parent="hud/cntr_gameover"]
 margin_left = 16.0
