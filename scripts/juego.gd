@@ -19,8 +19,9 @@ func _on_stage_cambio():
 	pass
 
 func _set_puntaje_mejor(nuevo_valor):
-	puntaje_mejor = nuevo_valor
-	emit_signal("puntaje_mejor_cambio")
+	if nuevo_valor > puntaje_mejor:
+		puntaje_mejor = nuevo_valor
+		emit_signal("puntaje_mejor_cambio")
 	pass
 
 func _set_puntaje_actual(nuevo_valor):

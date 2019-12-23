@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://scenes/fondo.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/pajaro.tscn" type="PackedScene" id=2]
@@ -13,6 +13,9 @@
 [ext_resource path="res://sprites/panel_score.png" type="Texture" id=11]
 [ext_resource path="res://sprites/button_score_pressed.png" type="Texture" id=12]
 [ext_resource path="res://sprites/label_game_over.png" type="Texture" id=13]
+[ext_resource path="res://sprites/number_middle_0.png" type="Texture" id=14]
+[ext_resource path="res://scripts/hbox_mejor_puntaje.gd" type="Script" id=15]
+[ext_resource path="res://sprites/label_new.png" type="Texture" id=16]
 
 [sub_resource type="GDScript" id=1]
 resource_name = "btn_instrucciones"
@@ -51,11 +54,20 @@ const sprite_numro = [
 
 func _ready():
 	juego.connect(\"puntaje_actual_cambio\", self, \"_on_puntaje_actual_cambio\")
+	var pajaro = utils.get_nodo_principal().get_node(\"pajaro\")
+	if pajaro:
+		pajaro.connect(\"state_cambio\", self, \"_on_cambio_nivel\")
+	
 	_on_puntaje_actual_cambio()
 	pass
 
 func _on_puntaje_actual_cambio():
 	set_numero(juego.puntaje_actual)
+	pass
+	
+func _on_cambio_nivel(pajaro):
+	if pajaro.get_state() == pajaro.STATE_SUELO:
+		hide()
 	pass
 	
 func set_numero(numero):
@@ -76,6 +88,7 @@ resource_name = "cntr_gameover"
 script/source = "extends Container
 
 func _ready():
+	hide()
 	var pajaro = utils.get_nodo_principal().get_node(\"pajaro\")
 	if pajaro:
 		pajaro.connect(\"state_cambio\", self, \"_on_pajaro_state_cambio\")
@@ -85,7 +98,82 @@ func _ready():
 func _on_pajaro_state_cambio(pajaro):
 	if pajaro.get_state() == pajaro.STATE_SUELO:
 		
-		show()
+		$anim.play(\"mostrar\")
+	pass
+"
+
+[sub_resource type="GDScript" id=6]
+resource_name = "hbox_ultimo_puntaje"
+script/source = "extends HBoxContainer
+
+const sprite_numero = [
+	preload(\"res://sprites/number_middle_0.png\"),
+	preload(\"res://sprites/number_middle_1.png\"),
+	preload(\"res://sprites/number_middle_2.png\"),
+	preload(\"res://sprites/number_middle_3.png\"),
+	preload(\"res://sprites/number_middle_4.png\"),
+	preload(\"res://sprites/number_middle_5.png\"),
+	preload(\"res://sprites/number_middle_6.png\"),
+	preload(\"res://sprites/number_middle_7.png\"),
+	preload(\"res://sprites/number_middle_8.png\"),
+	preload(\"res://sprites/number_middle_9.png\")
+]
+
+signal contar_termino
+
+func _ready():
+	var anim = utils.get_nodo_principal().get_node(\"hud/cntr_gameover/anim\")
+	yield(anim,\"animation_finished\")
+	contar_puntaje()
+	pass
+
+func contar_puntaje():
+	var lerp_tiempo = 0
+	var lerp_duracion = 0.5
+	
+	while lerp_tiempo < lerp_duracion:
+		lerp_tiempo += get_process_delta_time()
+		lerp_tiempo = min(lerp_tiempo, lerp_duracion)
+		
+		var porcentaje = lerp_tiempo / lerp_duracion
+		set_numero(int(lerp(0, juego.puntaje_actual, porcentaje)))
+		
+		yield(get_tree(), \"idle_frame\")
+	juego.puntaje_mejor = juego.puntaje_actual
+	emit_signal(\"contar_termino\")
+	pass
+
+func set_numero(numero):
+	for hijo in get_children():
+		hijo.queue_free()
+	
+	for digito in utils.get_digitos(numero):
+		var texture_frame = TextureRect.new()
+		texture_frame.set_texture(sprite_numero[digito])
+		add_child(texture_frame)
+	pass
+"
+
+[sub_resource type="GDScript" id=8]
+resource_name = "tex_nuevo"
+script/source = "extends TextureRect
+
+func _ready():
+	hide()
+	juego.connect(\"puntaje_mejor_cambio\",self,\"show\")
+	pass
+"
+
+[sub_resource type="GDScript" id=7]
+resource_name = "hbox_botones"
+script/source = "extends HBoxContainer
+
+func _ready():
+	hide()
+	
+	var hbox_ultimo_puntaje = utils.get_nodo_principal().find_node(\"hbox_ultimo_puntaje\")
+	if hbox_ultimo_puntaje:
+		hbox_ultimo_puntaje.connect(\"contar_termino\", self, \"show\")
 	pass
 "
 
@@ -95,12 +183,66 @@ script/source = "extends TextureButton
 
 func _ready():
 	connect(\"pressed\",self,\"_on_presionado\")
+	var hbox_ultimo_puntaje = utils.get_nodo_principal().find_node(\"hbox_ultimo_puntaje\")
+	if hbox_ultimo_puntaje:
+		hbox_ultimo_puntaje.connect(\"contar_termino\", self, \"grab_focus\")
 	pass
 	
 func _on_presionado():
 	state_manager.cambiar_nivel(state_manager.STAGE_GAME)
 	pass
 "
+
+[sub_resource type="Animation" id=5]
+resource_name = "mostrar"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("gameover:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.7 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("gameover:rect_position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.7 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 24, 45 ), Vector2( 24, 50 ) ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("txt_panelpuntaje:rect_position")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 0.5, 1 ),
+"update": 0,
+"values": [ Vector2( 16, 270 ), Vector2( 16, 90 ) ]
+}
 
 [node name="game_stage" type="Node2D"]
 
@@ -161,7 +303,6 @@ margin_bottom = 18.0
 texture = ExtResource( 7 )
 
 [node name="cntr_gameover" type="Container" parent="hud"]
-visible = false
 margin_right = 144.0
 margin_bottom = 256.0
 script = SubResource( 3 )
@@ -183,6 +324,53 @@ margin_right = 129.0
 margin_bottom = 147.0
 texture = ExtResource( 11 )
 
+[node name="hbox_ultimo_puntaje" type="HBoxContainer" parent="hud/cntr_gameover/txt_panelpuntaje"]
+margin_left = 62.9099
+margin_top = 17.0686
+margin_right = 102.91
+margin_bottom = 27.0686
+custom_constants/separation = 1
+alignment = 2
+script = SubResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="tex_numero0" type="TextureRect" parent="hud/cntr_gameover/txt_panelpuntaje/hbox_ultimo_puntaje"]
+margin_left = 33.0
+margin_right = 40.0
+margin_bottom = 10.0
+texture = ExtResource( 14 )
+
+[node name="hbox_mejor_puntaje" type="HBoxContainer" parent="hud/cntr_gameover/txt_panelpuntaje"]
+margin_left = 62.9099
+margin_top = 38.0386
+margin_right = 102.91
+margin_bottom = 48.0386
+custom_constants/separation = 1
+alignment = 2
+script = ExtResource( 15 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="tex_numero0" type="TextureRect" parent="hud/cntr_gameover/txt_panelpuntaje/hbox_mejor_puntaje"]
+margin_left = 33.0
+margin_right = 40.0
+margin_bottom = 10.0
+texture = ExtResource( 14 )
+
+[node name="TextureRect" type="TextureRect" parent="hud/cntr_gameover/txt_panelpuntaje"]
+margin_left = 67.4978
+margin_top = 29.3598
+margin_right = 83.4978
+margin_bottom = 36.3598
+texture = ExtResource( 16 )
+script = SubResource( 8 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="hbox_botones" type="HBoxContainer" parent="hud/cntr_gameover"]
 margin_left = 16.0
 margin_top = 160.0
@@ -190,6 +378,7 @@ margin_right = 129.0
 margin_bottom = 190.0
 custom_constants/separation = 9
 alignment = 1
+script = SubResource( 7 )
 
 [node name="btn_jugar" type="TextureButton" parent="hud/cntr_gameover/hbox_botones"]
 margin_right = 52.0
@@ -204,3 +393,7 @@ margin_right = 113.0
 margin_bottom = 30.0
 texture_normal = ExtResource( 10 )
 texture_pressed = ExtResource( 12 )
+
+[node name="anim" type="AnimationPlayer" parent="hud/cntr_gameover"]
+playback_speed = 1.5
+anims/mostrar = SubResource( 5 )
