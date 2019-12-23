@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://scenes/fondo.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/pajaro.tscn" type="PackedScene" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://scenes/spawnear_cano.tscn" type="PackedScene" id=4]
 [ext_resource path="res://scenes/spawnea_suelo.tscn" type="PackedScene" id=5]
 [ext_resource path="res://sprites/instructions.png" type="Texture" id=6]
+[ext_resource path="res://sprites/number_large_0.png" type="Texture" id=7]
 
 [sub_resource type="GDScript" id=1]
 resource_name = "btn_instrucciones"
@@ -22,6 +23,45 @@ func _on_pressed():
 		pajaro.set_state(pajaro.STATE_ALETEANDO)
 		
 	hide()
+	pass
+"
+
+[sub_resource type="GDScript" id=2]
+resource_name = "hbox_puntaje"
+script/source = "extends HBoxContainer
+
+const sprite_numro = [
+	preload(\"res://sprites/number_large_0.png\"),
+	preload(\"res://sprites/number_large_1.png\"),
+	preload(\"res://sprites/number_large_2.png\"),
+	preload(\"res://sprites/number_large_3.png\"),
+	preload(\"res://sprites/number_large_4.png\"),
+	preload(\"res://sprites/number_large_5.png\"),
+	preload(\"res://sprites/number_large_6.png\"),
+	preload(\"res://sprites/number_large_7.png\"),
+	preload(\"res://sprites/number_large_8.png\"),
+	preload(\"res://sprites/number_large_9.png\")
+]
+
+func _ready():
+	juego.connect(\"puntaje_actual_cambio\", self, \"_on_puntaje_actual_cambio\")
+	_on_puntaje_actual_cambio()
+	pass
+
+func _on_puntaje_actual_cambio():
+	set_numero(juego.puntaje_actual)
+	pass
+	
+func set_numero(numero):
+	for hijo in get_children():
+		hijo.queue_free()
+		
+	
+	
+	for digito in utils.get_digitos(numero):
+		var texture_frame = TextureRect.new()
+		texture_frame.set_texture(sprite_numro[digito])
+		add_child(texture_frame)
 	pass
 "
 
@@ -62,3 +102,23 @@ margin_top = -24.0
 margin_right = 29.0
 margin_bottom = 25.0
 texture = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="hbox_puntaje" type="HBoxContainer" parent="hud"]
+margin_top = 10.0
+margin_right = 144.0
+margin_bottom = 28.0
+custom_constants/separation = 2
+alignment = 1
+script = SubResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="text_numero0" type="TextureRect" parent="hud/hbox_puntaje"]
+margin_left = 66.0
+margin_right = 78.0
+margin_bottom = 18.0
+texture = ExtResource( 7 )

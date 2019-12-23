@@ -13,6 +13,7 @@ signal state_cambio
 
 func _ready():
 	
+	add_to_group(juego.GRUPO_PAJAROS)
 	connect("body_entered",self, "_on_cuerpo_entra")
 	pass
 
