@@ -41,7 +41,7 @@ func set_state(nuevo_state):
 	elif nuevo_state == STATE_HIT:
 		state = HitState.new(self)
 	elif nuevo_state == STATE_SUELO:
-		nuevo_state = SueloState.new(self)
+		state = SueloState.new(self)
 	pass
 	
 	emit_signal("state_cambio",self)

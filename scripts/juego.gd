@@ -11,6 +11,11 @@ signal puntaje_mejor_cambio
 signal puntaje_actual_cambio
 
 func _ready():
+	state_manager.connect("stage_cambio", self, "_on_stage_cambio")
+	pass
+
+func _on_stage_cambio():
+	puntaje_actual = 0
 	pass
 
 func _set_puntaje_mejor(nuevo_valor):
