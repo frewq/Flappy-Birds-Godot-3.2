@@ -25,7 +25,12 @@ func _process(delta):
 func _input(event):
 	state.input(event)
 	pass
-	
+
+func _unhandled_input(event):
+	if state.has_method("unhandled_input"):
+		state.unhandled_input(event)
+	pass
+
 func _on_cuerpo_entra(otro_cuerpo):
 	if state.has_method("on_cuerpo_entra"):
 		state.on_cuerpo_entra(otro_cuerpo)
@@ -107,6 +112,13 @@ class AletearState:
 	
 	func input(event):
 		if Input.is_action_just_pressed("aletear"):
+			aletear()
+			
+	func unhandled_input(event):
+		if not event is InputEventMouseButton or !event.is_pressed() or event.is_echo():
+			return
+			
+		if event.button_index == BUTTON_LEFT:
 			aletear()
 		pass
 	
