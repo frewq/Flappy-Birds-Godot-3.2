@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=2]
+[gd_scene load_steps=40 format=2]
 
 [ext_resource path="res://scenes/fondo.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/pajaro.tscn" type="PackedScene" id=2]
@@ -23,6 +23,7 @@
 [ext_resource path="res://sprites/button_pause.png" type="Texture" id=21]
 [ext_resource path="res://sprites/rect_black.png" type="Texture" id=22]
 [ext_resource path="res://sprites/button_resume.png" type="Texture" id=23]
+[ext_resource path="res://sprites/button_menu.png" type="Texture" id=24]
 
 [sub_resource type="GDScript" id=1]
 resource_name = "btn_instrucciones"
@@ -73,6 +74,8 @@ func _on_puntaje_actual_cambio():
 	pass
 	
 func _on_cambio_nivel(pajaro):
+	if pajaro.get_state() == pajaro.STATE_HIT:
+		hide()
 	if pajaro.get_state() == pajaro.STATE_SUELO:
 		hide()
 	pass
@@ -96,10 +99,21 @@ script/source = "extends TextureButton
 
 func _ready():
 	connect(\"pressed\", self, \"_on_presionado\")
+	
+	var pajaro = utils.get_nodo_principal().get_node(\"pajaro\")
+	if pajaro:
+		pajaro.connect(\"state_cambio\",self,\"_on_parajo_state_cambio\")
 	pass
-
+	
 func _on_presionado():
 	get_tree().paused = true
+	pass
+
+func _on_parajo_state_cambio(pajaro):
+	if pajaro.get_state() == pajaro.STATE_HIT:
+		hide()
+	if pajaro.get_state() == pajaro.STATE_SUELO:
+		hide()
 	pass
 "
 
@@ -361,6 +375,20 @@ func on_pausa():
 	pass
 "
 
+[sub_resource type="GDScript" id=15]
+resource_name = "btn_menu"
+script/source = "extends TextureButton
+
+func _ready():
+	connect(\"pressed\",self, \"on_presionado\")
+	pass
+
+func on_presionado():
+	get_tree().paused = false
+	state_manager.cambiar_nivel(state_manager.STAGE_MENU)
+	pass
+"
+
 [node name="game_stage" type="Node2D"]
 
 [node name="pajaro" parent="." instance=ExtResource( 2 )]
@@ -568,6 +596,17 @@ margin_right = 23.0
 margin_bottom = 24.0
 texture_normal = ExtResource( 23 )
 script = SubResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="btn_menu" type="TextureButton" parent="hud/cntr_pausa"]
+margin_left = 52.0
+margin_top = 121.0
+margin_right = 92.0
+margin_bottom = 135.0
+texture_normal = ExtResource( 24 )
+script = SubResource( 15 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
