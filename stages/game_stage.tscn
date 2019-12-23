@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=2]
+[gd_scene load_steps=41 format=2]
 
 [ext_resource path="res://scenes/fondo.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/pajaro.tscn" type="PackedScene" id=2]
@@ -24,6 +24,48 @@
 [ext_resource path="res://sprites/rect_black.png" type="Texture" id=22]
 [ext_resource path="res://sprites/button_resume.png" type="Texture" id=23]
 [ext_resource path="res://sprites/button_menu.png" type="Texture" id=24]
+
+[sub_resource type="GDScript" id=16]
+script/source = "extends Node
+
+onready var camara = get_parent()
+
+var tiempo = 0
+
+const duracion = 0.18
+const magnitud = 3
+
+func _ready():
+	var pajaro = utils.get_nodo_principal().get_node(\"pajaro\")
+	if pajaro:
+		pajaro.connect(\"state_cambio\", self, \"_on_pajaro_state_cambio\")
+	pass
+
+func _on_pajaro_state_cambio(pajaro):
+	if pajaro.get_state() == pajaro.STATE_HIT or pajaro.get_state() == pajaro.STATE_SUELO:
+		vibrar()
+		pajaro.disconnect(\"state_cambio\", self, \"_on_pajaro_state_cambio\")
+	pass
+
+func vibrar():
+	var offset_inicial = camara.get_offset()
+	
+	while tiempo < duracion:
+		tiempo += get_process_delta_time()
+		tiempo = min(tiempo, duracion)
+		
+		var offset = Vector2()
+		offset.x = rand_range(-magnitud, magnitud)
+		offset.y = rand_range(-magnitud, magnitud)
+		camara.set_offset(offset_inicial + offset)
+		
+		yield(get_tree(), \"idle_frame\")
+		pass
+	
+	tiempo = 0
+	camara.set_offset(offset_inicial)
+	pass
+"
 
 [sub_resource type="GDScript" id=1]
 resource_name = "btn_instrucciones"
@@ -398,6 +440,9 @@ offset = Vector2( -36, 0 )
 anchor_mode = 0
 current = true
 script = ExtResource( 3 )
+
+[node name="vibracion" type="Node" parent="camara"]
+script = SubResource( 16 )
 
 [node name="spawnea_suelo" parent="." instance=ExtResource( 5 )]
 
