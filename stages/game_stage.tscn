@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=2]
+[gd_scene load_steps=38 format=2]
 
 [ext_resource path="res://scenes/fondo.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/pajaro.tscn" type="PackedScene" id=2]
@@ -20,6 +20,9 @@
 [ext_resource path="res://sprites/spark_2.png" type="Texture" id=18]
 [ext_resource path="res://sprites/spark_0.png" type="Texture" id=19]
 [ext_resource path="res://sprites/spark_1.png" type="Texture" id=20]
+[ext_resource path="res://sprites/button_pause.png" type="Texture" id=21]
+[ext_resource path="res://sprites/rect_black.png" type="Texture" id=22]
+[ext_resource path="res://sprites/button_resume.png" type="Texture" id=23]
 
 [sub_resource type="GDScript" id=1]
 resource_name = "btn_instrucciones"
@@ -84,6 +87,19 @@ func set_numero(numero):
 		var texture_frame = TextureRect.new()
 		texture_frame.set_texture(sprite_numro[digito])
 		add_child(texture_frame)
+	pass
+"
+
+[sub_resource type="GDScript" id=12]
+resource_name = "btn_pausa"
+script/source = "extends TextureButton
+
+func _ready():
+	connect(\"pressed\", self, \"_on_presionado\")
+	pass
+
+func _on_presionado():
+	get_tree().paused = true
 	pass
 "
 
@@ -310,6 +326,41 @@ tracks/3/keys = {
 "values": [ Vector2( 16, 270 ), Vector2( 16, 90 ) ]
 }
 
+[sub_resource type="GDScript" id=13]
+resource_name = "cntr_pausa"
+script/source = "extends Container
+
+func _ready():
+	hide()
+	var btn_pausa = utils.get_nodo_principal().find_node(\"btn_pausa\")
+	if btn_pausa:
+		btn_pausa.connect(\"pressed\",self, \"on_pausa\")
+		
+	var btn_resumir = utils.get_nodo_principal().find_node(\"btn_resumir\")
+	if btn_resumir:
+		btn_resumir.connect(\"pressed\",self,\"_on_presionado\")
+	pass
+
+func _on_presionado():
+	hide()
+
+func on_pausa():
+	show()
+	pass
+"
+
+[sub_resource type="GDScript" id=14]
+script/source = "extends TextureButton
+
+func _ready():
+	connect(\"pressed\",self, \"on_pausa\")
+	pass
+
+func on_pausa():
+	get_tree().paused = false
+	pass
+"
+
 [node name="game_stage" type="Node2D"]
 
 [node name="pajaro" parent="." instance=ExtResource( 2 )]
@@ -367,6 +418,17 @@ margin_left = 66.0
 margin_right = 78.0
 margin_bottom = 18.0
 texture = ExtResource( 7 )
+
+[node name="btn_pausa" type="TextureButton" parent="hud"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 23.0
+margin_bottom = 24.0
+texture_normal = ExtResource( 21 )
+script = SubResource( 12 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="cntr_gameover" type="Container" parent="hud"]
 margin_right = 144.0
@@ -482,3 +544,30 @@ texture_pressed = ExtResource( 12 )
 [node name="anim" type="AnimationPlayer" parent="hud/cntr_gameover"]
 playback_speed = 1.5
 anims/mostrar = SubResource( 11 )
+
+[node name="cntr_pausa" type="Container" parent="hud"]
+pause_mode = 2
+margin_right = 144.0
+margin_bottom = 256.0
+script = SubResource( 13 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="tex_fondo" type="TextureRect" parent="hud/cntr_pausa"]
+modulate = Color( 1, 1, 1, 0.380392 )
+margin_right = 144.0
+margin_bottom = 256.0
+texture = ExtResource( 22 )
+expand = true
+
+[node name="btn_resumir" type="TextureButton" parent="hud/cntr_pausa"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 23.0
+margin_bottom = 24.0
+texture_normal = ExtResource( 23 )
+script = SubResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
