@@ -1,6 +1,7 @@
 extends RigidBody2D
 
 onready var state = VolarState.new(self)
+var estado_previo
 
 var rapidez = 50
 
@@ -38,6 +39,7 @@ func _on_cuerpo_entra(otro_cuerpo):
 	
 func set_state(nuevo_state):
 	state.salir()
+	estado_previo = get_state()
 	
 	if nuevo_state == STATE_VOLANDO:
 		state = VolarState.new(self)
@@ -133,6 +135,8 @@ class AletearState:
 		pajaro.set_linear_velocity(Vector2(pajaro.linear_velocity.x, -150))
 		pajaro.set_angular_velocity(-3)
 		pajaro.get_node("AnimationPlayer").play("aletear")
+		
+		sounds.get_node("sfx_wing").play()
 		pass
 		
 	func salir():
@@ -152,6 +156,8 @@ class HitState:
 		var otro_cuerpo = pajaro.get_colliding_bodies()[0]
 		pajaro.add_collision_exception_with(otro_cuerpo)
 		
+		sounds.get_node("sfx_hit").play()
+		sounds.get_node("sfx_morir").play()
 		pass
 	
 	func update(delta):
@@ -178,6 +184,9 @@ class SueloState:
 		self.pajaro = pajaro
 		pajaro.set_linear_velocity(Vector2(0, 0))
 		pajaro.set_angular_velocity(0)
+		
+		if pajaro.estado_previo != pajaro.STATE_HIT:
+			sounds.get_node("sfx_hit").play()
 		pass
 	
 	func update(delta):

@@ -7,4 +7,5 @@ func _ready():
 func _on_entra_cuerpo(otro_cuerpo):
 	if otro_cuerpo.is_in_group(juego.GRUPO_PAJAROS):
 		juego.puntaje_actual += 1
+		sounds.get_node("sfx_point").play()
 	pass

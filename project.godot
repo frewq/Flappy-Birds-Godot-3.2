@@ -24,6 +24,7 @@ config/icon="res://icon.png"
 utils="*res://scripts/utils.gd"
 juego="*res://scripts/juego.gd"
 state_manager="*res://scenes/state_manager.tscn"
+sounds="*res://scenes/sounds.tscn"
 
 [display]
 

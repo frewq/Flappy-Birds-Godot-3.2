@@ -20,6 +20,7 @@ func cambiar_nivel(stage_path):
 	
 	# fade to black
 	$anim.play("fade_in")
+	sounds.get_node("sfx_swooshing").play()
 	yield(get_node("anim"), "animation_finished")
 	
 	# change stage
