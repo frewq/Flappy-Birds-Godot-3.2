@@ -48,7 +48,7 @@ func spawnear_y_mover():
 func spawnear_cano():
 	var nuevo_cano = escena_cano.instance()
 	nuevo_cano.set_position(get_position())
-	nuevo_cano.connect("exit_tree", self, "spawnear_y_mover")
+	nuevo_cano.connect("tree_exited", self, "spawnear_y_mover")
 	get_node("contenedor").add_child(nuevo_cano)
 	pass
 

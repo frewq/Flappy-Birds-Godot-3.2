@@ -17,7 +17,7 @@ func spawnear_y_mover():
 func spawnea_suelo():
 	var nuevo_suelo = escena_suelo.instance()
 	nuevo_suelo.set_position(get_position())
-	nuevo_suelo.connect("destruido", self, "spawnear_y_mover")
+	nuevo_suelo.connect("tree_exited", self, "spawnear_y_mover")
 	get_node("contenedor").add_child(nuevo_suelo)
 	pass
 
